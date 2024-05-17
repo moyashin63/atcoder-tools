@@ -124,6 +124,10 @@ class AtCoderClient(metaclass=Singleton):
 
     def download_problem_content(self, problem: Problem) -> ProblemContent:
         resp = self._request(problem.get_url())
+        while resp.status_code == 429:
+            logger.warning("Received status code 429: Too Many Requests. Retrying after a delay...")
+            time.sleep(1)  # Wait for 1 seconds before retrying
+            resp = self._request(problem.get_url())
 
         try:
             return ProblemContent.from_html(resp.text)
